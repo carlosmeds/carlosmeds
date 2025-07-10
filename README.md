@@ -1,4 +1,4 @@
-<h1 align="center">Sup 😎, I'm Carlos</h1>
+<h1 align="center">Sup 😎, I'm Carlos Nakaguishi</h1>
 <h3 align="center">A passionate software engineer that cares about performance optimization and scalable architecture</h3>
 
 <h3 align="left">Connect with me:</h3>
