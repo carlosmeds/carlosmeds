@@ -44,8 +44,8 @@
 
 <p>
   <img
-    src="https://skillicons.dev/icons?i=go,ts,python,postgres,mongodb,redis,docker,kubernetes,aws,terraform,grafana"
-    alt="Go, TypeScript, Python, PostgreSQL, MongoDB, Redis, Docker, Kubernetes, AWS, Terraform and Grafana"
+    src="https://skillicons.dev/icons?i=go,ts,python,postgres,mongodb,redis,docker,kubernetes,aws,terraform,grafana,rabbitmq,kafka,graphql,react"
+    alt="Go, TypeScript, Python, PostgreSQL, MongoDB, Redis, Docker, Kubernetes, AWS, Terraform, Grafana, RabbitMQ, Kafka,graphQL and React"
   />
 </p>
 
