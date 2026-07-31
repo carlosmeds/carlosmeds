@@ -1,11 +1,60 @@
-<h1 align="center">Sup 😎, I'm Carlos Nakaguishi</h1>
-<h3 align="center">A passionate software engineer that cares about performance optimization and scalable architecture</h3>
+<h1 align="center">Hi, I'm Carlos Nakaguishi 👋</h1>
 
-<h3 align="left">Connect with me:</h3>
-<p align="left">
-<a href="https://linkedin.com/in/carlos-nakaguishi" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="carlos-nakaguishi" height="30" width="40" /></a>
+<h3 align="center">
+  Software Engineering Manager with a hands-on background in backend engineering
+</h3>
+
+<p align="center">
+  Interested in system design, performance, reliability, and observability.
 </p>
 
-<h3 align="left">Languages and Tools:</h3>
-<p align="left"> <a href="https://golang.org" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/go/go-original.svg" alt="go" width="40" height="40"/> </a> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" alt="javascript" width="40" height="40"/> </a> <a href="https://www.python.org" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="python" width="40" height="40"/> </a> </p>
-<p><img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=carlosmeds&" alt="carlosmeds" /></p>
+<p align="center">
+  <a href="https://linkedin.com/in/carlos-nakaguishi" target="_blank">
+    <img
+      src="https://img.shields.io/badge/LinkedIn-Carlos%20Nakaguishi-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"
+      alt="LinkedIn"
+    />
+  </a>
+  <a href="https://medium.com/@carlosmeds" target="_blank">
+    <img
+      src="https://img.shields.io/badge/Medium-@carlosmeds-000000?style=for-the-badge&logo=medium&logoColor=white"
+      alt="Medium"
+    />
+  </a>
+</p>
+
+## About me
+
+- 👥 Engineering Manager focused on technical leadership and team development
+- 💻 Hands-on experience building backend and distributed systems
+- ⚙️ Interested in system design, performance, reliability, and observability
+- ✍️ Writing about software engineering and leadership on [Medium](https://medium.com/@carlosmeds)
+- 🎓 Systems Analysis and Development at UFPR · MBA in IT Management at FGV
+
+## Certification
+
+<p>
+  <img
+    src="https://img.shields.io/badge/AWS%20Certified-Developer%20Associate-FF9900?style=for-the-badge&logo=amazonwebservices&logoColor=white"
+    alt="AWS Certified Developer Associate"
+  />
+</p>
+
+## Technologies
+
+<p>
+  <img
+    src="https://skillicons.dev/icons?i=go,ts,python,postgres,mongodb,redis,docker,kubernetes,aws,terraform,grafana"
+    alt="Go, TypeScript, Python, PostgreSQL, MongoDB, Redis, Docker, Kubernetes, AWS, Terraform and Grafana"
+  />
+</p>
+
+## GitHub streak
+
+<p>
+  <img
+    align="center"
+    src="https://github-readme-streak-stats.herokuapp.com/?user=carlosmeds&"
+    alt="Carlos Nakaguishi's GitHub contribution streak"
+  />
+</p>
