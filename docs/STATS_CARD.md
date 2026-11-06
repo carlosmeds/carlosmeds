@@ -168,10 +168,10 @@ O snippet usa `<picture>`:
 ```html
 <p align="center">
   <picture>
-    <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset=".../streak-compact-dark.svg" />
-    <source media="(max-width: 600px)" srcset=".../streak-compact-light.svg" />
+    <source media="(max-width: 560px) and (prefers-color-scheme: dark)" srcset=".../streak-compact-dark.svg" />
+    <source media="(max-width: 560px)" srcset=".../streak-compact-light.svg" />
     <source media="(prefers-color-scheme: dark)" srcset=".../streak-dark.svg" />
-    <img src=".../streak-light.svg" width="900" alt="..." />
+    <img src=".../streak-light.svg" alt="..." />
   </picture>
 </p>
 ```
@@ -183,13 +183,22 @@ O `<img>` é o fallback para renderizadores sem suporte a `<picture>` (tema clar
 
 - O GitHub remove `style`, CSS e JavaScript do README. Sobram atributos HTML e `<picture>`.
   O sanitizador mantém `media` com largura e tema (verificado com a API `/markdown`).
-- O SVG tem `viewBox` e `width`/`height`, então escala proporcionalmente. O GitHub aplica
-  `max-width: 100%` às imagens, então o card nunca estoura a coluna.
-- Só escalar não basta no celular: o card largo (900px) a ~360px ficaria com legendas de
-  ~6px. Por isso existe um **layout compacto** (480×580, empilhado), escolhido por
-  `max-width: 600px`.
-- A media query avalia a largura da **janela**, não da coluna do README. Entre ~600px e
-  ~900px o card largo aparece um pouco reduzido, mas legível.
+- O card tem duas linhas em ambos os layouts: 3 colunas (Total | Current Streak | Longest)
+  e 2 colunas (Active Days | Contributions / Active Day). Nada é empilhado.
+- **Largo**: 500×220, proporção próxima do GitHub Readme Streak Stats. O `<img>` não tem
+  `width`: o tamanho vem do próprio SVG (`width`/`height` + `viewBox`), e o GitHub aplica
+  `max-width: 100%`, então o card encolhe proporcionalmente quando a coluna é mais estreita.
+- **Compacto**: 330×200, mesma estrutura, com margens menores e tipografia relativamente
+  maior. É escolhido por `max-width: 560px`. Num celular (coluna de ~308px) o card largo
+  ficaria com legendas de ~7px; o compacto fica em ~9–10px. Esse é o limite físico de 3
+  colunas lado a lado nessa largura sem empilhar.
+- Cada papel de texto (números, títulos, datas, legendas) usa **um único tamanho por linha**.
+  Se um valor for longo demais para a coluna (ex.: `Dec 30, 2026 – Jan 2, 2027` ou números
+  de 6 dígitos), o tamanho daquele papel diminui em todas as colunas, em vez de cortar ou
+  sobrepor. A largura é estimada, porque o SVG em `<img>` não mede texto, e a estimativa é
+  conservadora.
+- A media query avalia a largura da **janela**, não da coluna do README. Perto de 560px o
+  card largo pode aparecer levemente reduzido.
 - Dentro de `<img>` o SVG não carrega fontes externas. Usamos a pilha de fontes do sistema
   (a mesma do GitHub), então a tipografia varia levemente entre sistemas. O layout tem folga
   para isso.

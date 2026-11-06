@@ -72,3 +72,35 @@ describe("svg rendering", () => {
     expect(() => validateSvg("", card)).toThrow(/size/);
   });
 });
+
+describe("svg layout", () => {
+  const sizesOf = (svg: string, content: string) =>
+    [...svg.matchAll(/<text [^>]*font-size="([\d.]+)"[^>]*>([^<]*)<\/text>/g)].filter((m) => m[2] === content).map((m) => Number(m[1]));
+
+  it("has the compact horizontal proportions", () => {
+    expect(renderCard(card, DEFAULT_THEMES.light, "wide")).toContain('viewBox="0 0 500 220"');
+    expect(renderCard(card, DEFAULT_THEMES.light, "compact")).toContain('viewBox="0 0 330 200"');
+  });
+
+  for (const layout of ["wide", "compact"] as const) {
+    it(`uses one size per text role (${layout})`, () => {
+      const long = { ...card, total: "123,456", currentRange: "Dec 30, 2026 – Jan 2, 2027" };
+      const svg = renderCard(long, DEFAULT_THEMES.light, layout);
+      const labels = ["Total Contributions", "Current Streak", "Longest Streak"].flatMap((l) => sizesOf(svg, l));
+      expect(new Set(labels).size).toBe(1);
+      const ranges = [long.totalRange, long.currentRange, long.longestRange].flatMap((r) => sizesOf(svg, r));
+      expect(new Set(ranges).size).toBe(1);
+      expect(new Set([...sizesOf(svg, long.total), ...sizesOf(svg, long.longest)]).size).toBe(1);
+    });
+
+    it(`keeps every text element inside the card (${layout})`, () => {
+      const svg = renderCard({ ...card, total: "123,456", longest: "1,234", average: "1,234.5" }, DEFAULT_THEMES.light, layout);
+      const [, w, h] = /viewBox="0 0 (\d+) (\d+)"/.exec(svg)!.map(Number);
+      for (const m of svg.matchAll(/<text x="([\d.]+)" y="([\d.]+)"/g)) {
+        expect(Number(m[1])).toBeGreaterThan(0);
+        expect(Number(m[1])).toBeLessThan(w!);
+        expect(Number(m[2])).toBeLessThan(h!);
+      }
+    });
+  }
+});

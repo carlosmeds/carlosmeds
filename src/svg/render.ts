@@ -138,7 +138,7 @@ function frame({ width, height, body, card, t }: FrameOptions): string {
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title desc">` +
     `<title id="title">${escapeXml(title)}</title>` +
     `<desc id="desc">${escapeXml(desc)}</desc>` +
-    `<rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="16" fill="${t.background}" stroke="${t.border}"/>` +
+    `<rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="10" fill="${t.background}" stroke="${t.border}"/>` +
     `<g font-family="${FONT}">${body}</g>` +
     `</svg>\n`
   );
@@ -150,81 +150,157 @@ interface BottomStat {
   icon: "calendar" | "bars";
 }
 
-/** Icon box followed by number + caption, centred as a group around `cx`. */
-function bottomStatInline(cx: number, cy: number, s: BottomStat, t: Theme): string {
-  const icon = 56;
-  const gap = 22;
-  const valueSize = 36;
-  const captionSize = 17;
-  const textWidth = Math.max(estimateWidth(s.value, valueSize, true), estimateWidth(s.caption, captionSize));
-  const left = Math.round(cx - (icon + gap + textWidth) / 2);
-  const tx = left + icon + gap;
-  return (
-    iconBox(left, cy - icon / 2, icon, s.icon, t) +
-    text(s.value, { x: tx, y: cy + 4, size: valueSize, weight: 700, fill: t.text, anchor: "start" }) +
-    text(s.caption, { x: tx, y: cy + 30, size: captionSize, fill: t.muted, anchor: "start" })
-  );
-}
-
-function renderWide(card: CardText, t: Theme): string {
-  const W = 900;
-  const H = 400;
-  const cols = [170, 450, 730];
-  const side = (x: number, value: string, label: string, range: string) =>
-    text(value, { x, y: 126, size: 50, weight: 700, fill: t.text }) +
-    text(label, { x, y: 166, size: 20, weight: 500, fill: t.label }) +
-    text(range, { x, y: 198, size: 16, fill: t.muted });
-
-  const body = [
-    side(cols[0]!, card.total, "Total Contributions", card.totalRange),
-    streakRing(cols[1]!, 100, 56, card.current, 46, t),
-    text("Current Streak", { x: cols[1]!, y: 196, size: 20, weight: 700, fill: t.accent }),
-    text(card.currentRange, { x: cols[1]!, y: 224, size: 16, fill: t.muted }),
-    side(cols[2]!, card.longest, "Longest Streak", card.longestRange),
-    line(310, 56, 310, 210, t.divider),
-    line(590, 56, 590, 210, t.divider),
-    line(40, 258, W - 40, 258, t.divider),
-    line(450, 286, 450, 372, t.divider),
-    bottomStatInline(245, 326, { value: card.activeDays, caption: "Active Days", icon: "calendar" }, t),
-    bottomStatInline(655, 326, { value: card.average, caption: "Contributions / Active Day", icon: "bars" }, t),
-  ].join("");
-  return frame({ width: W, height: H, body, card, t });
+/** Largest font size <= `size` whose estimated width fits in `maxWidth`. */
+function fit(content: string, size: number, maxWidth: number, bold = false): number {
+  const width = estimateWidth(content, size, bold);
+  return width <= maxWidth ? size : Math.floor((size * maxWidth) / width * 10) / 10;
 }
 
 /**
- * Narrow layout for phones: streak on top, then two 2-column rows. Rendered at
- * ~340px wide it keeps captions around 11–12px instead of the ~6px the wide card
- * would shrink to.
+ * Both layouts share the same structure (3 columns on top, 2 below); only the metrics
+ * differ. "wide" is the desktop card (~500x220, close to the classic streak card);
+ * "compact" is narrower with relatively larger type, for phone-width READMEs.
  */
-function renderCompact(card: CardText, t: Theme): string {
-  const W = 480;
-  const H = 580;
-  const cols = [125, 355];
-  const pair = (x: number, value: string, label: string, range: string) =>
-    text(value, { x, y: 302, size: 38, weight: 700, fill: t.text }) +
-    text(label, { x, y: 332, size: 17, weight: 500, fill: t.label }) +
-    text(range, { x, y: 358, size: 15, fill: t.muted });
-  const stacked = (x: number, s: BottomStat) =>
-    iconBox(x - 26, 412, 52, s.icon, t) +
-    text(s.value, { x, y: 512, size: 34, weight: 700, fill: t.text }) +
-    text(s.caption, { x, y: 540, size: 15, fill: t.muted });
+interface Metrics {
+  width: number;
+  height: number;
+  pad: number;
+  /** Top row */
+  ringCy: number;
+  ringR: number;
+  ringNumber: number;
+  sideNumberY: number;
+  sideNumber: number;
+  labelY: number;
+  label: number;
+  rangeY: number;
+  range: number;
+  streakLabelY: number;
+  streakRangeY: number;
+  dividerTop: [number, number];
+  /** Bottom row */
+  rowY: number;
+  bottomCy: number;
+  icon: number;
+  iconGap: number;
+  bottomNumber: number;
+  caption: number;
+  bottomDivider: [number, number];
+}
 
+const METRICS: Record<Layout, Metrics> = {
+  wide: {
+    width: 500,
+    height: 220,
+    pad: 14,
+    ringCy: 60,
+    ringR: 31,
+    ringNumber: 25,
+    sideNumberY: 70,
+    sideNumber: 28,
+    labelY: 95,
+    label: 13,
+    rangeY: 114,
+    range: 11.5,
+    streakLabelY: 113,
+    streakRangeY: 130,
+    dividerTop: [30, 120],
+    rowY: 146,
+    bottomCy: 183,
+    icon: 34,
+    iconGap: 11,
+    bottomNumber: 21,
+    caption: 11.5,
+    bottomDivider: [160, 206],
+  },
+  compact: {
+    width: 330,
+    height: 200,
+    pad: 8,
+    ringCy: 54,
+    ringR: 26,
+    ringNumber: 22,
+    sideNumberY: 63,
+    sideNumber: 24,
+    labelY: 86,
+    label: 11.5,
+    rangeY: 103,
+    range: 10.5,
+    streakLabelY: 101,
+    streakRangeY: 117,
+    dividerTop: [28, 108],
+    rowY: 131,
+    bottomCy: 165,
+    icon: 28,
+    iconGap: 8,
+    bottomNumber: 18,
+    caption: 10.5,
+    bottomDivider: [144, 188],
+  },
+};
+
+/** Icon box followed by number + caption, centred as a group in a column. */
+function bottomStat(cx: number, m: Metrics, sizes: { number: number; caption: number; maxText: number }, s: BottomStat, t: Theme): string {
+  const { number: numberSize, caption: captionSize, maxText } = sizes;
+  const textWidth = Math.min(
+    maxText,
+    Math.max(estimateWidth(s.value, numberSize, true), estimateWidth(s.caption, captionSize)),
+  );
+  const left = Math.round(cx - (m.icon + m.iconGap + textWidth) / 2);
+  const tx = left + m.icon + m.iconGap;
+  return (
+    iconBox(left, Math.round(m.bottomCy - m.icon / 2), m.icon, s.icon, t) +
+    text(s.value, { x: tx, y: m.bottomCy + Math.round(numberSize * 0.12), size: numberSize, weight: 700, fill: t.text, anchor: "start" }) +
+    text(s.caption, { x: tx, y: m.bottomCy + Math.round(captionSize * 1.45), size: captionSize, fill: t.muted, anchor: "start" })
+  );
+}
+
+function renderLayout(card: CardText, t: Theme, m: Metrics): string {
+  const inner = m.width - 2 * m.pad;
+  const col = inner / 3;
+  const cols = [m.pad + col / 2, m.width / 2, m.width - m.pad - col / 2];
+  const maxText = col - 6;
+
+  // One size per text role, so every column in a row uses the same typography; long
+  // values shrink the whole role instead of a single column.
+  const shared = (base: number, max: number, bold: boolean, ...values: string[]) =>
+    Math.min(...values.map((v) => fit(v, base, max, bold)));
+  const sideNumber = shared(m.sideNumber, maxText, true, card.total, card.longest);
+  const labelSize = Math.min(
+    shared(m.label, maxText, false, "Total Contributions", "Longest Streak"),
+    shared(m.label, maxText, true, "Current Streak"),
+  );
+  const rangeSize = shared(m.range, maxText, false, card.totalRange, card.currentRange, card.longestRange);
+
+  const bottomMax = m.width / 2 - m.icon - m.iconGap - 12;
+  const bottomSizes = {
+    number: shared(m.bottomNumber, bottomMax, true, card.activeDays, card.average),
+    caption: shared(m.caption, bottomMax, false, "Active Days", "Contributions / Active Day"),
+    maxText: bottomMax,
+  };
+
+  const side = (x: number, value: string, label: string, range: string) =>
+    text(value, { x, y: m.sideNumberY, size: sideNumber, weight: 700, fill: t.text }) +
+    text(label, { x, y: m.labelY, size: labelSize, weight: 500, fill: t.label }) +
+    text(range, { x, y: m.rangeY, size: rangeSize, fill: t.muted });
+
+  const halfCenters = [m.width / 4, (3 * m.width) / 4];
   const body = [
-    streakRing(W / 2, 98, 56, card.current, 46, t),
-    text("Current Streak", { x: W / 2, y: 194, size: 20, weight: 700, fill: t.accent }),
-    text(card.currentRange, { x: W / 2, y: 221, size: 16, fill: t.muted }),
-    line(32, 246, W - 32, 246, t.divider),
-    pair(cols[0]!, card.total, "Total Contributions", card.totalRange),
-    pair(cols[1]!, card.longest, "Longest Streak", card.longestRange),
-    line(W / 2, 266, W / 2, 368, t.divider),
-    line(32, 390, W - 32, 390, t.divider),
-    stacked(cols[0]!, { value: card.activeDays, caption: "Active Days", icon: "calendar" }),
-    stacked(cols[1]!, { value: card.average, caption: "Contributions / Active Day", icon: "bars" }),
-    line(W / 2, 410, W / 2, 552, t.divider),
+    side(cols[0]!, card.total, "Total Contributions", card.totalRange),
+    streakRing(cols[1]!, m.ringCy, m.ringR, card.current, m.ringNumber, t),
+    text("Current Streak", { x: cols[1]!, y: m.streakLabelY, size: labelSize, weight: 700, fill: t.accent }),
+    text(card.currentRange, { x: cols[1]!, y: m.streakRangeY, size: rangeSize, fill: t.muted }),
+    side(cols[2]!, card.longest, "Longest Streak", card.longestRange),
+    line(m.pad + col, m.dividerTop[0], m.pad + col, m.dividerTop[1], t.divider),
+    line(m.pad + 2 * col, m.dividerTop[0], m.pad + 2 * col, m.dividerTop[1], t.divider),
+    line(m.pad + 6, m.rowY, m.width - m.pad - 6, m.rowY, t.divider),
+    line(m.width / 2, m.bottomDivider[0], m.width / 2, m.bottomDivider[1], t.divider),
+    bottomStat(halfCenters[0]!, m, bottomSizes, { value: card.activeDays, caption: "Active Days", icon: "calendar" }, t),
+    bottomStat(halfCenters[1]!, m, bottomSizes, { value: card.average, caption: "Contributions / Active Day", icon: "bars" }, t),
   ].join("");
-  return frame({ width: W, height: H, body, card, t });
+  return frame({ width: m.width, height: m.height, body, card, t });
 }
 
 export function renderCard(card: CardText, theme: Theme, layout: Layout = "wide"): string {
-  return layout === "wide" ? renderWide(card, theme) : renderCompact(card, theme);
+  return renderLayout(card, theme, METRICS[layout]);
 }

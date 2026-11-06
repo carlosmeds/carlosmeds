@@ -55,11 +55,11 @@
 <p align="center">
   <picture>
     <source
-      media="(max-width: 600px) and (prefers-color-scheme: dark)"
+      media="(max-width: 560px) and (prefers-color-scheme: dark)"
       srcset="https://raw.githubusercontent.com/carlosmeds/carlosmeds/generated/assets/streak-compact-dark.svg"
     />
     <source
-      media="(max-width: 600px)"
+      media="(max-width: 560px)"
       srcset="https://raw.githubusercontent.com/carlosmeds/carlosmeds/generated/assets/streak-compact-light.svg"
     />
     <source
@@ -68,7 +68,6 @@
     />
     <img
       src="https://raw.githubusercontent.com/carlosmeds/carlosmeds/generated/assets/streak-light.svg"
-      width="900"
       alt="Carlos Nakaguishi's GitHub contribution stats: total contributions, current and longest streak, active days and contributions per active day"
     />
   </picture>
