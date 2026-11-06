@@ -123,7 +123,7 @@ export async function fetchContributionDays(
     });
     const rl = data.rateLimit;
     logger.info(
-      `  ${year}: ${calendar.totalContributions} contributions (${collection.restrictedContributionsCount} private) over ${inYear.length} days` +
+      `  ${year}: ${calendar.totalContributions} contributions (${collection.restrictedContributionsCount} private) over ${inYear.length} days, ${inYear.filter((d) => d.count > 0).length} active` +
         (rl ? ` [rate limit: cost ${rl.cost}, ${rl.remaining} left]` : ""),
     );
   }
