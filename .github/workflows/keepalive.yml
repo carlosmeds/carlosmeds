@@ -1,0 +1,49 @@
+name: Keepalive
+
+# GitHub disables scheduled workflows in public repositories after 60 days without
+# repository activity. This workflow re-enables the scheduled workflows through the
+# official REST endpoint (PUT /repos/{owner}/{repo}/actions/workflows/{id}/enable)
+# every ~30 days. It creates no commits and does not touch any branch.
+# Limitations are documented in docs/STATS_CARD.md ("Keepalive").
+
+on:
+  schedule:
+    # 08:41 UTC on the 1st of each month (every 28–31 days, well within 60).
+    - cron: "41 8 1 * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write # required by the "enable a workflow" endpoint
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      WORKFLOWS: update-stats.yml keepalive.yml
+    steps:
+      - name: Re-enable scheduled workflows
+        run: |
+          set -uo pipefail
+          failed=0
+          for wf in $WORKFLOWS; do
+            before=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$wf" --jq .state 2>&1) || {
+              echo "::error::Could not read $wf: $before"; failed=1; continue; }
+            if out=$(gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/$wf/enable" 2>&1); then
+              after=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$wf" --jq .state 2>/dev/null || echo unknown)
+              echo "$wf: $before -> $after"
+              if [ "$before" != "active" ]; then
+                echo "::warning::$wf was '$before' and has been re-enabled"
+              fi
+            else
+              echo "::error::Failed to enable $wf: $out"
+              failed=1
+            fi
+          done
+          exit $failed

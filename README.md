@@ -51,10 +51,25 @@
 
 ## GitHub streak
 
-<p>
-  <img
-    align="center"
-    src="https://github-readme-streak-stats.herokuapp.com/?user=carlosmeds&"
-    alt="Carlos Nakaguishi's GitHub contribution streak"
-  />
+<!-- Stats card generated daily by .github/workflows/update-stats.yml (see docs/STATS_CARD.md) -->
+<p align="center">
+  <picture>
+    <source
+      media="(max-width: 600px) and (prefers-color-scheme: dark)"
+      srcset="https://raw.githubusercontent.com/carlosmeds/carlosmeds/generated/assets/streak-compact-dark.svg"
+    />
+    <source
+      media="(max-width: 600px)"
+      srcset="https://raw.githubusercontent.com/carlosmeds/carlosmeds/generated/assets/streak-compact-light.svg"
+    />
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://raw.githubusercontent.com/carlosmeds/carlosmeds/generated/assets/streak-dark.svg"
+    />
+    <img
+      src="https://raw.githubusercontent.com/carlosmeds/carlosmeds/generated/assets/streak-light.svg"
+      width="900"
+      alt="Carlos Nakaguishi's GitHub contribution stats: total contributions, current and longest streak, active days and contributions per active day"
+    />
+  </picture>
 </p>

@@ -1,0 +1,51 @@
+name: Update stats card
+
+on:
+  schedule:
+    # 07:17 UTC = 04:17 in America/Sao_Paulo (UTC-3, no DST). Off-peak and off the
+    # top of the hour, when GitHub's scheduler is least congested.
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write # push to the `generated` branch
+
+concurrency:
+  group: update-stats-card
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint, typecheck and test
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      - name: Generate SVGs
+        env:
+          # Optional personal token for private contributions (see docs/STATS_CARD.md).
+          GH_STATS_TOKEN: ${{ secrets.GH_STATS_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node dist/cli.js --out "$RUNNER_TEMP/stats-card"
+
+      - name: Publish to the generated branch
+        run: scripts/publish.sh "$RUNNER_TEMP/stats-card"

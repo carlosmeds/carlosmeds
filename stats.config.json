@@ -1,0 +1,11 @@
+{
+  "username": "carlosmeds",
+  "timezone": "America/Sao_Paulo",
+  "excludeWeekends": false,
+  "allowEmpty": false,
+  "accent": "#f97316",
+  "themes": {
+    "light": {},
+    "dark": {}
+  }
+}
